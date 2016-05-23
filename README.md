@@ -1,5 +1,5 @@
 # FCBCurrencyService
-Simple currency converter written in Swift
+Simple Swift currency converter using Yahoo Query Language (YQL).
 
 ### Installation
 Simply drag the `Library` folder to your project.
