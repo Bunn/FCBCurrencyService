@@ -25,6 +25,8 @@ If there's some connection issue, the block will return an error as `DownloadErr
             }
         }
 ```
+Output `Currency: USD/CAD value: 1.3111`
+
 See `Example` project for more samples.
 
 ## Screenshots
