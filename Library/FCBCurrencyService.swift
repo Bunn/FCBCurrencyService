@@ -25,8 +25,8 @@
 import Foundation
 
 enum FCBCurrencyServiceError {
-    case DownloadError
-    case BadData
+    case downloadError
+    case badData
 }
 
 struct FCBCurrencyService {
@@ -34,38 +34,38 @@ struct FCBCurrencyService {
     
     // MARK: Public Methods
     
-    func fetchQuoteWithBaseCurrency(baseCurrency: String, resultCurrency: String, completion: (quote: FCBQuote?, error: FCBCurrencyServiceError?) -> Void) {
+    func fetchQuoteWithBaseCurrency(_ baseCurrency: String, resultCurrency: String, completion: @escaping (_ quote: FCBQuote?, _ error: FCBCurrencyServiceError?) -> Void) {
         let baseURL = "https://query.yahooapis.com/v1/public/yql"
         let env = "store://datatables.org/alltableswithkeys"
         let format = "json"
         let currency = "\(baseCurrency)\(resultCurrency)=x"
         let query = "select * from yahoo.finance.quotes where symbol in (\"\(currency)\")"
         
-        guard let urlComponents = NSURLComponents(string: baseURL) else {
-            completion(quote: nil, error: .BadData)
+        guard var urlComponents = URLComponents(string: baseURL) else {
+            completion(nil, .badData)
             return
         }
         
         urlComponents.queryItems = [
-            NSURLQueryItem(name: "q", value: query),
-            NSURLQueryItem(name: "env", value: env),
-            NSURLQueryItem(name: "format", value: format)
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "env", value: env),
+            URLQueryItem(name: "format", value: format)
         ]
         
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithURL(urlComponents.URL!, completionHandler: {(dataResponse, reponse, error) in
+        let session = URLSession.shared
+        let task = session.dataTask(with: urlComponents.url!, completionHandler: {(dataResponse, reponse, error) in
             guard error == nil, let data = dataResponse else {
-                completion(quote: nil, error: .DownloadError)
+                completion(nil, .downloadError)
                 return
             }
 
-            let jsonData = try? NSJSONSerialization.JSONObjectWithData(data, options: .AllowFragments) as! NSDictionary
+            let jsonData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as! NSDictionary
             guard let quoteDictionary = self.dictionaryValue(jsonData, keys: ["query", "results", "quote"]),
                 let quote = FCBQuote(dictionary: quoteDictionary) else {
-                    completion(quote: nil, error: .BadData)
+                    completion(nil, .badData)
                     return
             }
-            completion(quote: quote, error: nil)
+            completion(quote, nil)
         })
         task.resume()
     }
@@ -73,7 +73,7 @@ struct FCBCurrencyService {
     
     // MARK: Private Methods
     
-    private func dictionaryValue(dic: NSDictionary?, keys: [String]) -> NSDictionary? {
+    fileprivate func dictionaryValue(_ dic: NSDictionary?, keys: [String]) -> NSDictionary? {
         guard var dictionary = dic else { return nil }
         for key in keys {
             if let newValue = dictionary[key] as? NSDictionary {

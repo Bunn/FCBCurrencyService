@@ -38,16 +38,16 @@ class ViewController: UIViewController {
         pickerView.delegate = self
     }
     
-    func fetchValuesWithBaseCurrency(baseCurrency: String, resultCurrency: String) {
+    func fetchValuesWithBaseCurrency(_ baseCurrency: String, resultCurrency: String) {
         service.fetchQuoteWithBaseCurrency(baseCurrency, resultCurrency: resultCurrency) { (quote, error) in
-            dispatch_async(dispatch_get_main_queue(), {
+            DispatchQueue.main.async(execute: {
                 if let result = quote {
                     self.resultLabel.text = "\(result.name) \(result.rate)"
                 } else if let resultError = error {
                     switch resultError {
-                    case .DownloadError :
+                    case .downloadError :
                         self.resultLabel.text = "Download Error"
-                    case .BadData:
+                    case .badData:
                         self.resultLabel.text = "Currency Error"
                     }
                 }
@@ -62,28 +62,28 @@ extension ViewController : UIPickerViewDataSource, UIPickerViewDelegate {
     
     // MARK: UIPickerViewDataSource
     
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 2
     }
     
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return currencies.count
     }
     
     
     // MARK: UIPickerViewDelegate
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return currencies[row]
     }
     
-    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
-        print(pickerView.selectedRowInComponent(0))
-        print(pickerView.selectedRowInComponent(1))
+        print(pickerView.selectedRow(inComponent: 0))
+        print(pickerView.selectedRow(inComponent: 1))
         
-        let baseCurrency = currencies[pickerView.selectedRowInComponent(0)]
-        let resultCurrency = currencies[pickerView.selectedRowInComponent(1)]
+        let baseCurrency = currencies[pickerView.selectedRow(inComponent: 0)]
+        let resultCurrency = currencies[pickerView.selectedRow(inComponent: 1)]
         
         fetchValuesWithBaseCurrency(baseCurrency, resultCurrency: resultCurrency)
     }
