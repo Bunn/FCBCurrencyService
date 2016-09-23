@@ -78,10 +78,6 @@ extension ViewController : UIPickerViewDataSource, UIPickerViewDelegate {
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        
-        print(pickerView.selectedRow(inComponent: 0))
-        print(pickerView.selectedRow(inComponent: 1))
-        
         let baseCurrency = currencies[pickerView.selectedRow(inComponent: 0)]
         let resultCurrency = currencies[pickerView.selectedRow(inComponent: 1)]
         
