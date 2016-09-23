@@ -26,24 +26,38 @@ import Foundation
 
 struct FCBQuote {
     var name: String
-    var currency: String
-    var yearHigh: String?
-    var yearLow: String?
+    var yearHigh: String
+    var yearLow: String
     var rate: String
+}
+
+enum SerializationError: Error {
+    case missing(String)
+}
+
+extension FCBQuote {
+    init(json: [String: Any]) throws {
+        
+        guard let name = json["Name"] as? String else {
+            throw SerializationError.missing("Name")
+        }
+        
+        guard let rate = json["Bid"] as? String else {
+            throw SerializationError.missing("Bid")
+        }
+        
+        guard let yearHigh = json["YearHigh"] as? String else {
+            throw SerializationError.missing("YearHigh")
+        }
+        
+        guard let yearLow = json["YearLow"] as? String else {
+            throw SerializationError.missing("YearLow")
+        }
     
-    init?(dictionary: NSDictionary) {
-        
-        //If there's no name, currency and rate, everything else is useless
-        guard let _name = dictionary["Name"] as? String ,
-        let _currency = dictionary["Currency"] as? String ,
-        let _rate = dictionary["Bid"] as? String
-            else { return nil }
-        name = _name
-        rate = _rate
-        currency = _currency
-        
-        yearHigh = dictionary["YearHigh"] as? String
-        yearLow = dictionary["YearLow"] as? String
+        self.name = name
+        self.rate = rate
+        self.yearLow = yearLow
+        self.yearHigh = yearHigh
     }
 }
 

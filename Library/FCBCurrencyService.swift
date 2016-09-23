@@ -53,35 +53,34 @@ struct FCBCurrencyService {
         ]
         
         let session = URLSession.shared
-        let task = session.dataTask(with: urlComponents.url!, completionHandler: {(dataResponse, reponse, error) in
+
+        session.dataTask(with: urlComponents.url!, completionHandler: {(dataResponse, reponse, error) in
             guard error == nil, let data = dataResponse else {
                 completion(nil, .downloadError)
                 return
             }
-
-            let jsonData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as! NSDictionary
-            guard let quoteDictionary = self.dictionaryValue(jsonData, keys: ["query", "results", "quote"]),
-                let quote = FCBQuote(dictionary: quoteDictionary) else {
+            
+            if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String : Any] {
+                guard let query = json?["query"] as? [String : Any],
+                    let results = query["results"] as? [String : Any],
+                    let quoteDictionary = results["quote"] as? [String :Any] else {
+                        completion(nil, .badData)
+                        return
+                }
+                
+                do {
+                    let quote = try FCBQuote(json: quoteDictionary)
+                    completion(quote,nil)
+                } catch {
+                    print(error)
                     completion(nil, .badData)
-                    return
-            }
-            completion(quote, nil)
-        })
-        task.resume()
-    }
-    
-    
-    // MARK: Private Methods
-    
-    fileprivate func dictionaryValue(_ dic: NSDictionary?, keys: [String]) -> NSDictionary? {
-        guard var dictionary = dic else { return nil }
-        for key in keys {
-            if let newValue = dictionary[key] as? NSDictionary {
-                dictionary = newValue
+                }
             } else {
-                return nil
+                completion(nil, .badData)
             }
-        }
-        return dictionary
+        }).resume()
     }
 }
+
+
+
